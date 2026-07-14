@@ -1,0 +1,72 @@
+# NodeTwo external status monitoring — covers the blind spot Uptime Kuma
+# (which runs ON node-1) can't: node-1 itself being down. Runs entirely on
+# GitHub Actions + Pages.
+#
+# Secrets (repo Actions secrets, values in Bitwarden):
+#   GH_PAT                   — fine-grained PAT: Actions/Contents/Issues/
+#                              Workflows RW on this repo
+#   CF_ACCESS_CLIENT_ID/_SECRET — Cloudflare Access service token
+#                              (nodetwo-upptime, minted by nodetwo_infra
+#                              Terraform) so checks pass the Entra-gated
+#                              Access apps while humans still get the login.
+owner: JorDunn
+repo: upptime
+
+sites:
+  # Access-bypassed hostnames — probed directly (each app enforces its own auth).
+  - name: ntfy
+    url: https://ntfy.nodetwo.io/v1/health
+  - name: Windmill
+    url: https://windmill.nodetwo.io
+
+  # Entra-gated hostnames — the service-token headers satisfy Cloudflare
+  # Access (non_identity policy, precedence 1 on each app).
+  - name: Beszel
+    url: https://beszel.nodetwo.io
+    headers:
+      - "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID"
+      - "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET"
+  - name: Uptime Kuma
+    url: https://uptime.nodetwo.io
+    headers:
+      - "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID"
+      - "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET"
+  - name: Wealthfolio
+    url: https://wealthfolio.nodetwo.io
+    headers:
+      - "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID"
+      - "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET"
+  - name: Outline
+    url: https://outline.nodetwo.io
+    headers:
+      - "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID"
+      - "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET"
+  - name: Memos
+    url: https://memos.nodetwo.io
+    headers:
+      - "CF-Access-Client-Id: $CF_ACCESS_CLIENT_ID"
+      - "CF-Access-Client-Secret: $CF_ACCESS_CLIENT_SECRET"
+
+  # NOT monitored (yet):
+  # - ynab.nodetwo.io — gated by its OWN Access service token, not the
+  #   Upptime one; attach the upptime_service policy to that app in
+  #   nodetwo_infra Terraform if coverage is wanted.
+  # - homepage / the nodetwo.io site — not deployed yet.
+
+status-website:
+  # No custom domain yet — status.nodetwo.io would need a CNAME to
+  # jordunn.github.io in nodetwo_infra's Terraform; swap baseUrl for
+  # `cname: status.nodetwo.io` then.
+  baseUrl: /upptime
+  name: NodeTwo Status
+  introTitle: "**NodeTwo** service status"
+  introMessage: External monitoring for NodeTwo services, powered by GitHub Actions + Pages (independent of the fleet it watches).
+  navbar:
+    - title: Status
+      href: /
+    - title: GitHub
+      href: https://github.com/$OWNER/$REPO
+
+# Alerting: Upptime opens/closes GitHub Issues on incidents. ntfy push
+# bridging comes later — it needs the ntfy admin tk_ token from the ntfy
+# first-run setup (see nodetwo_docker INFRA_TODO.md).
