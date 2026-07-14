@@ -54,10 +54,9 @@ sites:
   # - homepage / the nodetwo.io site — not deployed yet.
 
 status-website:
-  # No custom domain yet — status.nodetwo.io would need a CNAME to
-  # jordunn.github.io in nodetwo_infra's Terraform; swap baseUrl for
-  # `cname: status.nodetwo.io` then.
-  baseUrl: /upptime
+  # CNAME status.nodetwo.io -> jordunn.github.io lives in nodetwo_infra's
+  # Terraform (DNS-only so GitHub Pages can provision the certificate).
+  cname: status.nodetwo.io
   name: NodeTwo Status
   introTitle: "**NodeTwo** service status"
   introMessage: External monitoring for NodeTwo services, powered by GitHub Actions + Pages (independent of the fleet it watches).
